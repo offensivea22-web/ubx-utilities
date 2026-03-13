@@ -8,6 +8,8 @@ data: new SlashCommandBuilder()
 
 async execute(interaction){
 
+try{
+
 const embed = new EmbedBuilder()
 .setTitle("Welcome to the NRG Utilities bot help panel")
 .setDescription("Choose what command category you want to see first.")
@@ -41,6 +43,17 @@ await interaction.reply({
 embeds:[embed],
 components:[row]
 });
+
+}catch(error){
+
+console.error("Help command error:", error);
+
+interaction.reply({
+content:"Help panel failed to load.",
+ephemeral:true
+});
+
+}
 
 }
 
