@@ -1,12 +1,14 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
-module.exports={
+module.exports = {
 
-data:new SlashCommandBuilder()
+data: new SlashCommandBuilder()
 .setName("panel")
 .setDescription("Create NRG link dispenser panel"),
 
 async execute(interaction){
+
+await interaction.deferReply({ephemeral:true});
 
 const embed = new EmbedBuilder()
 .setTitle("NRG Link Dispenser")
@@ -14,6 +16,8 @@ const embed = new EmbedBuilder()
 Weekly Limits
 Normal Users: 1 link
 NRG Premium / Booster: 3 links
+
+Choose how you want to receive your link.
 `);
 
 const row = new ActionRowBuilder().addComponents(
@@ -35,10 +39,7 @@ embeds:[embed],
 components:[row]
 });
 
-await interaction.reply({
-content:"Panel created",
-ephemeral:true
-});
+await interaction.editReply("Panel created");
 
 }
 
