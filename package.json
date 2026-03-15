@@ -1,15 +1,20 @@
 {
-"name":"nrg-utilities",
-"version":"1.0.0",
-"main":"index.js",
-"scripts":{
-"start":"node index.js",
-"deploy":"node deploy/deployCommands.js"
-},
-"dependencies":{
-"discord.js":"^14.14.1",
-"mongoose":"^7.6.0",
-"dotenv":"^16.3.1",
-"node-fetch":"^2.6.7"
-}
+  "name": "filter-check-bot",
+  "version": "1.0.0",
+  "description": "Discord bot for checking URLs against content filters",
+  "main": "check.js",
+  "scripts": {
+    "start": "node check.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.0.0",
+    "dotenv": "^16.0.0",
+    "ws": "^8.0.0",
+    "jsdom": "^24.0.0",
+    "fetch-cookie": "^3.0.0",
+    "tough-cookie": "^4.0.0"
+  }
 }
