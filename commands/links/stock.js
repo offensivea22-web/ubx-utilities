@@ -24,14 +24,14 @@ const textContent =
 `NRG LINK STOCK EXPORT
 
 ========================
-⚡ NRG FULL LINKS
+⚡ UBX FULL LINKS
 Available: ${fullCount}
 ========================
 
 ${fullList || "None"}
 
 ========================
-🟢 NRG LITE LINKS
+🟢 IGNORE THIS PLEASE
 Available: ${liteCount}
 ========================
 
@@ -42,7 +42,7 @@ ${liteList || "None"}
 const buffer = Buffer.from(textContent, "utf-8");
 
 const file = new AttachmentBuilder(buffer, {
-name: "nrg-link-stock.txt"
+name: "ubx-link-stock.txt"
 });
 
 
