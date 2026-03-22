@@ -16,7 +16,7 @@ data: new SlashCommandBuilder()
 async execute(interaction){
 
 const embed = new EmbedBuilder()
-.setTitle("⚡ NRG Link Dispenser")
+.setTitle("⚡ UBX Link Dispenser")
 .setDescription(`
 Welcome to the official UBX Link System.
 
