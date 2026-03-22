@@ -18,7 +18,7 @@ async execute(interaction){
 const embed = new EmbedBuilder()
 .setTitle("⚡ NRG Link Dispenser")
 .setDescription(`
-Welcome to the official NRG Link System.
+Welcome to the official UBX Link System.
 
 📌 Rules:
 • Normal Users: 1 link per week  
@@ -27,7 +27,7 @@ Welcome to the official NRG Link System.
 Select BOTH options below before a link is sent.
 `)
 .setColor("#00AEEF")
-.setFooter({ text:"UBX Utilities • Automated System" });
+.setFooter({ text:"UBX Utilities • Made by RVEPRTY" });
 
 const deliveryMenu = new StringSelectMenuBuilder()
 .setCustomId("link_delivery")
