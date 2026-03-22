@@ -22,12 +22,12 @@ Welcome to the official NRG Link System.
 
 📌 Rules:
 • Normal Users: 1 link per week  
-• NRG Premium / Booster: 3 links per week  
+• Booster: 3 links per week  
 
 Select BOTH options below before a link is sent.
 `)
 .setColor("#00AEEF")
-.setFooter({ text:"NRG Utilities • Automated System" });
+.setFooter({ text:"UBX Utilities • Automated System" });
 
 const deliveryMenu = new StringSelectMenuBuilder()
 .setCustomId("link_delivery")
@@ -50,12 +50,12 @@ const typeMenu = new StringSelectMenuBuilder()
 .setPlaceholder("Choose Link Type")
 .addOptions(
 {
-label:"NRG Full",
+label:"UBX",
 value:"full",
 emoji:"⚡"
 },
 {
-label:"NRG Lite",
+label:"Ignore This",
 value:"lite",
 emoji:"🟢"
 }
