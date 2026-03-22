@@ -110,7 +110,7 @@ module.exports = (client) => {
                 user.count++;
                 await user.save();
 
-                const message = `Your NRG ${data.type.toUpperCase()} Link:\n${link.url}`;
+                const message = `Your ${data.type.toUpperCase()} Link:\n${link.url}`;
 
                 if (data.delivery === "dm") {
 
