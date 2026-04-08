@@ -18,44 +18,34 @@ data: new SlashCommandBuilder()
 
 async execute(interaction){
 
-try {
-
-
-await interaction.deferReply({ ephemeral:true });
-
 
 if(
   !interaction.member.roles.cache.has(process.env.ADMIN_ROLE) &&
   !interaction.member.permissions.has("Administrator")
 ){
-  return interaction.editReply({
-    content:"No permission."
+  return interaction.reply({
+    content:"No permission.",
+    ephemeral:true
   });
 }
 
 const role = interaction.options.getRole("role");
 const msg = interaction.options.getString("message");
 
-
-await interaction.editReply({
-  content:`📤 Preparing to DM role: **${role.name}**...`
+await interaction.reply({
+  content:`📤 DMing role: **${role.name}**`,
+  ephemeral:true
 });
 
 
-await interaction.guild.members.fetch();
-
-const progressMsg = await interaction.channel.send(
-  `📤 Starting DM for **${role.name}**...`
-);
-
-const members = interaction.guild.members.cache.filter(m =>
-  m.roles.cache.has(role.id) && !m.user.bot
-);
+const members = role.members.filter(m => !m.user.bot);
 
 let total = members.size;
 let done = 0;
 let success = 0;
 let failed = 0;
+
+const progressMsg = await interaction.channel.send(`📤 Starting DM for **${role.name}**...`);
 
 if(total === 0){
   return progressMsg.edit("❌ No users in that role.");
@@ -78,7 +68,7 @@ for(const member of members.values()){
 
   done++;
 
-  if(done % 10 === 0 || done === total){
+  if(done % 5 === 0 || done === total){
     await progressMsg.edit(
 `📤 Sending DMs to **${role.name}**
 
@@ -89,7 +79,7 @@ ${progressBar(done,total)}
     );
   }
 
-  await new Promise(r => setTimeout(r, 700));
+  await new Promise(r => setTimeout(r, 500)); 
 }
 
 await progressMsg.edit(
@@ -101,18 +91,6 @@ ${progressBar(total,total)}
 ✅ Sent: ${success}
 ❌ Failed: ${failed}`
 );
-
-} catch (err) {
-
-console.error("DMROLE ERROR:", err);
-
-try{
-  await interaction.editReply({
-    content:"❌ Something went wrong. Check logs."
-  });
-}catch{}
-
-}
 
 }
 
