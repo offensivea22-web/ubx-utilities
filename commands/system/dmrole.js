@@ -24,7 +24,7 @@ if(
   !interaction.member.permissions.has("Administrator")
 ){
   return interaction.reply({
-    content:"You do not have permission to use this command.",
+    content:"You do not have permission.",
     ephemeral:true
   });
 }
@@ -32,16 +32,19 @@ if(
 const role = interaction.options.getRole("role");
 const msg = interaction.options.getString("message");
 
+await interaction.guild.members.fetch();
 
 await interaction.reply({
   content:`📤 DMing role: **${role.name}**`,
   ephemeral:true
 });
 
+const progressMsg = await interaction.channel.send(`📤 Starting DM for **${role.name}**...`);
 
-const progressMsg = await interaction.channel.send(`📤 Starting DM for role **${role.name}**...`);
 
-const members = role.members.filter(m => !m.user.bot);
+const members = interaction.guild.members.cache.filter(m =>
+  m.roles.cache.has(role.id) && !m.user.bot
+);
 
 let total = members.size;
 let done = 0;
@@ -58,7 +61,6 @@ if(total === 0){
   return progressMsg.edit("❌ No users in that role.");
 }
 
-
 for(const member of members.values()){
 
   try{
@@ -70,7 +72,6 @@ for(const member of members.values()){
 
   done++;
 
-  
   if(done % 10 === 0 || done === total){
     await progressMsg.edit(
 `📤 Sending DMs to **${role.name}**
@@ -82,10 +83,8 @@ ${progressBar(done, total)}
     );
   }
 
-
   await new Promise(r => setTimeout(r, 700));
 }
-
 
 await progressMsg.edit(
 `✅ DM Complete for **${role.name}**
