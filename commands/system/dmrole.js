@@ -1,41 +1,49 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
 
 data: new SlashCommandBuilder()
-.setName("dmall")
-.setDescription("DM everyone in the server")
+.setName("dmrole")
+.setDescription("DM all users in a specific role")
+.addRoleOption(o =>
+  o.setName("role")
+   .setDescription("Role to DM")
+   .setRequired(true)
+)
 .addStringOption(o =>
   o.setName("message")
    .setDescription("Message to send")
    .setRequired(true)
-)
-.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+),
 
 async execute(interaction){
 
 
-if(!interaction.member.roles.cache.has(process.env.ADMIN_ROLE)){
+if(
+  !interaction.member.roles.cache.has(process.env.ADMIN_ROLE) &&
+  !interaction.member.permissions.has("Administrator")
+){
   return interaction.reply({
     content:"You do not have permission to use this command.",
     ephemeral:true
   });
 }
 
+const role = interaction.options.getRole("role");
 const msg = interaction.options.getString("message");
 
 
 await interaction.reply({
-  content:"📤 DM process started. Check channel for progress.",
+  content:`📤 DMing role: **${role.name}**`,
   ephemeral:true
 });
 
-const progressMsg = await interaction.channel.send("📤 Starting DM process...");
 
-const members = await interaction.guild.members.fetch();
-const users = members.filter(m => !m.user.bot);
+const progressMsg = await interaction.channel.send(`📤 Starting DM for role **${role.name}**...`);
 
-let total = users.size;
+const members = role.members.filter(m => !m.user.bot);
+
+let total = members.size;
 let done = 0;
 let success = 0;
 let failed = 0;
@@ -46,7 +54,12 @@ const progressBar = (current, total) => {
   return `[${"█".repeat(bars)}${"░".repeat(10 - bars)}] ${percent}%`;
 };
 
-for(const member of users.values()){
+if(total === 0){
+  return progressMsg.edit("❌ No users in that role.");
+}
+
+
+for(const member of members.values()){
 
   try{
     await member.send(msg);
@@ -57,9 +70,10 @@ for(const member of users.values()){
 
   done++;
 
-  if(done % 15 === 0 || done === total){
+  
+  if(done % 10 === 0 || done === total){
     await progressMsg.edit(
-`📤 Sending DMs...
+`📤 Sending DMs to **${role.name}**
 
 ${progressBar(done, total)}
 
@@ -68,11 +82,13 @@ ${progressBar(done, total)}
     );
   }
 
-  await new Promise(r => setTimeout(r, 800));
+
+  await new Promise(r => setTimeout(r, 700));
 }
 
+
 await progressMsg.edit(
-`✅ DM Complete!
+`✅ DM Complete for **${role.name}**
 
 ${progressBar(total, total)}
 
