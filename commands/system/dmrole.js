@@ -18,6 +18,8 @@ data: new SlashCommandBuilder()
 
 async execute(interaction){
 
+try {
+
 
 await interaction.deferReply({ ephemeral:true });
 
@@ -27,7 +29,7 @@ if(
   !interaction.member.permissions.has("Administrator")
 ){
   return interaction.editReply({
-    content:"You do not have permission."
+    content:"No permission."
   });
 }
 
@@ -35,13 +37,16 @@ const role = interaction.options.getRole("role");
 const msg = interaction.options.getString("message");
 
 
-await interaction.guild.members.fetch();
-
 await interaction.editReply({
-  content:`📤 DMing role: **${role.name}**`
+  content:`📤 Preparing to DM role: **${role.name}**...`
 });
 
-const progressMsg = await interaction.channel.send(`📤 Starting DM for **${role.name}**...`);
+
+await interaction.guild.members.fetch();
+
+const progressMsg = await interaction.channel.send(
+  `📤 Starting DM for **${role.name}**...`
+);
 
 const members = interaction.guild.members.cache.filter(m =>
   m.roles.cache.has(role.id) && !m.user.bot
@@ -52,15 +57,15 @@ let done = 0;
 let success = 0;
 let failed = 0;
 
-const progressBar = (current, total) => {
-  const percent = Math.floor((current / total) * 100);
-  const bars = Math.floor(percent / 10);
-  return `[${"█".repeat(bars)}${"░".repeat(10 - bars)}] ${percent}%`;
-};
-
 if(total === 0){
   return progressMsg.edit("❌ No users in that role.");
 }
+
+const progressBar = (c, t) => {
+  const p = Math.floor((c/t)*100);
+  const b = Math.floor(p/10);
+  return `[${"█".repeat(b)}${"░".repeat(10-b)}] ${p}%`;
+};
 
 for(const member of members.values()){
 
@@ -77,7 +82,7 @@ for(const member of members.values()){
     await progressMsg.edit(
 `📤 Sending DMs to **${role.name}**
 
-${progressBar(done, total)}
+${progressBar(done,total)}
 
 👥 ${done}/${total}
 ✅ ${success} | ❌ ${failed}`
@@ -90,12 +95,24 @@ ${progressBar(done, total)}
 await progressMsg.edit(
 `✅ DM Complete for **${role.name}**
 
-${progressBar(total, total)}
+${progressBar(total,total)}
 
 👥 Total: ${total}
 ✅ Sent: ${success}
 ❌ Failed: ${failed}`
 );
+
+} catch (err) {
+
+console.error("DMROLE ERROR:", err);
+
+try{
+  await interaction.editReply({
+    content:"❌ Something went wrong. Check logs."
+  });
+}catch{}
+
+}
 
 }
 
