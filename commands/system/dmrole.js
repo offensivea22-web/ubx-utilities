@@ -19,28 +19,29 @@ data: new SlashCommandBuilder()
 async execute(interaction){
 
 
+await interaction.deferReply({ ephemeral:true });
+
+
 if(
   !interaction.member.roles.cache.has(process.env.ADMIN_ROLE) &&
   !interaction.member.permissions.has("Administrator")
 ){
-  return interaction.reply({
-    content:"You do not have permission.",
-    ephemeral:true
+  return interaction.editReply({
+    content:"You do not have permission."
   });
 }
 
 const role = interaction.options.getRole("role");
 const msg = interaction.options.getString("message");
 
+
 await interaction.guild.members.fetch();
 
-await interaction.reply({
-  content:`📤 DMing role: **${role.name}**`,
-  ephemeral:true
+await interaction.editReply({
+  content:`📤 DMing role: **${role.name}**`
 });
 
 const progressMsg = await interaction.channel.send(`📤 Starting DM for **${role.name}**...`);
-
 
 const members = interaction.guild.members.cache.filter(m =>
   m.roles.cache.has(role.id) && !m.user.bot
