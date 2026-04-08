@@ -1,10 +1,10 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 module.exports = {
 
 data: new SlashCommandBuilder()
 .setName("dmrole")
-.setDescription("DM all users in a specific role")
+.setDescription("DM all users in a role with live status")
 .addRoleOption(o =>
   o.setName("role")
    .setDescription("Role to DM")
@@ -18,7 +18,6 @@ data: new SlashCommandBuilder()
 
 async execute(interaction){
 
-
 await interaction.deferReply({ ephemeral:true });
 
 
@@ -26,22 +25,16 @@ if(
   !interaction.member.roles.cache.has(process.env.ADMIN_ROLE) &&
   !interaction.member.permissions.has("Administrator")
 ){
-  return interaction.editReply({
-    content:"No permission."
-  });
+  return interaction.editReply({ content:"No permission." });
 }
 
 const role = interaction.options.getRole("role");
 const msg = interaction.options.getString("message");
 
-
-await interaction.editReply({
-  content:`📤 Fetching members for role: **${role.name}**...`
-});
+await interaction.editReply(`📤 Starting DM process for **${role.name}**...`);
 
 
-await interaction.guild.members.fetch({ time: 15000 }).catch(() => null);
-
+await interaction.guild.members.fetch();
 
 const members = interaction.guild.members.cache.filter(m =>
   m.roles.cache.has(role.id) && !m.user.bot
@@ -52,13 +45,7 @@ let done = 0;
 let success = 0;
 let failed = 0;
 
-const progressMsg = await interaction.channel.send(
-  `📤 Starting DM for **${role.name}**...`
-);
-
-if(total === 0){
-  return progressMsg.edit("❌ No users found in that role.");
-}
+let logs = [];
 
 const progressBar = (c, t) => {
   const p = Math.floor((c/t)*100);
@@ -66,41 +53,71 @@ const progressBar = (c, t) => {
   return `[${"█".repeat(b)}${"░".repeat(10-b)}] ${p}%`;
 };
 
+const embed = new EmbedBuilder()
+.setTitle(`📤 DM Progress - ${role.name}`)
+.setColor("#00AEEF")
+.setDescription("Starting...")
+.setFooter({ text:"XCloud DM System" });
+
+const progressMsg = await interaction.channel.send({ embeds:[embed] });
+
 for(const member of members.values()){
 
+  let status;
+
   try{
-    await member.send(msg);
+    const dm = await member.createDM();
+    await dm.send(msg);
     success++;
+    status = `✅ <@${member.id}>: DMED`;
   }catch{
     failed++;
+    status = `❌ <@${member.id}>: FAILED`;
   }
 
+  logs.push(status);
   done++;
 
-  if(done % 5 === 0 || done === total){
-    await progressMsg.edit(
-`📤 Sending DMs to **${role.name}**
+  
+  const recentLogs = logs.slice(-10).join("\n");
 
-${progressBar(done,total)}
+  
+  if(done % 2 === 0 || done === total){
+
+    const updatedEmbed = new EmbedBuilder()
+    .setTitle(`📤 DM Progress - ${role.name}`)
+    .setColor("#00AEEF")
+    .setDescription(
+`${progressBar(done,total)}
 
 👥 ${done}/${total}
-✅ ${success} | ❌ ${failed}`
-    );
+✅ ${success} | ❌ ${failed}
+
+**Recent Activity:**
+${recentLogs || "None"}`
+    )
+    .setFooter({ text:"Xcloud DM System" });
+
+    await progressMsg.edit({ embeds:[updatedEmbed] });
   }
 
-  await new Promise(r => setTimeout(r, 500));
+  await new Promise(r => setTimeout(r, 800));
 }
 
-await progressMsg.edit(
-`✅ DM Complete for **${role.name}**
 
-${progressBar(total,total)}
+const finalEmbed = new EmbedBuilder()
+.setTitle(`✅ DM Complete - ${role.name}`)
+.setColor("#00FF88")
+.setDescription(
+`${progressBar(total,total)}
 
 👥 Total: ${total}
 ✅ Sent: ${success}
 ❌ Failed: ${failed}`
-);
-  
+)
+.setFooter({ text:"XCloud DM System" });
+
+await progressMsg.edit({ embeds:[finalEmbed] });
 
 }
 
