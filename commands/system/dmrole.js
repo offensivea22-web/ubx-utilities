@@ -19,36 +19,45 @@ data: new SlashCommandBuilder()
 async execute(interaction){
 
 
+await interaction.deferReply({ ephemeral:true });
+
+
 if(
   !interaction.member.roles.cache.has(process.env.ADMIN_ROLE) &&
   !interaction.member.permissions.has("Administrator")
 ){
-  return interaction.reply({
-    content:"No permission.",
-    ephemeral:true
+  return interaction.editReply({
+    content:"No permission."
   });
 }
 
 const role = interaction.options.getRole("role");
 const msg = interaction.options.getString("message");
 
-await interaction.reply({
-  content:`📤 DMing role: **${role.name}**`,
-  ephemeral:true
+
+await interaction.editReply({
+  content:`📤 Fetching members for role: **${role.name}**...`
 });
 
 
-const members = role.members.filter(m => !m.user.bot);
+await interaction.guild.members.fetch({ time: 15000 }).catch(() => null);
+
+
+const members = interaction.guild.members.cache.filter(m =>
+  m.roles.cache.has(role.id) && !m.user.bot
+);
 
 let total = members.size;
 let done = 0;
 let success = 0;
 let failed = 0;
 
-const progressMsg = await interaction.channel.send(`📤 Starting DM for **${role.name}**...`);
+const progressMsg = await interaction.channel.send(
+  `📤 Starting DM for **${role.name}**...`
+);
 
 if(total === 0){
-  return progressMsg.edit("❌ No users in that role.");
+  return progressMsg.edit("❌ No users found in that role.");
 }
 
 const progressBar = (c, t) => {
@@ -79,7 +88,7 @@ ${progressBar(done,total)}
     );
   }
 
-  await new Promise(r => setTimeout(r, 500)); 
+  await new Promise(r => setTimeout(r, 500));
 }
 
 await progressMsg.edit(
